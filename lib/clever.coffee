@@ -213,8 +213,40 @@ module.exports = (api_key, url_base='https://api.getclever.com') ->
 
   class District extends Resource
     @path: '/v1.1/districts'
+
+    collectAndReturn: (stream, callback) ->
+      items = []
+      stream.on 'data', (item) ->
+        items.push(item)
+      stream.on 'end', () ->
+        console.log("Collected #{items.length} items")
+        callback(null, items)
+
+    fetchSchools: (callback) =>
+      @collectAndReturn(clever.School.find().where('district').equals(@get('id')).stream(), callback)
+
+    fetchStudents: (callback) =>
+      @collectAndReturn(clever.Student.find().where('district').equals(@get('id')).stream(), callback)
+
+    fetchTeachers: (callback) =>
+      @collectAndReturn(clever.Teacher.find().where('district').equals(@get('id')).stream(), callback)
+
+    fetchSections: (callback) =>
+      @collectAndReturn(clever.Section.find().where('district').equals(@get('id')).stream(), callback)
+
+
   class School extends Resource
     @path: '/v1.1/schools'
+
+    fetchStudents: (callback) =>
+      @collectAndReturn(clever.Student.find().where('school').equals(@get('id')).stream(), callback)
+
+    fetchTeachers: (callback) =>
+      @collectAndReturn(clever.Teacher.find().where('school').equals(@get('id')).stream(), callback)
+
+    fetchSections: (callback) =>
+      @collectAndReturn(clever.Section.find().where('school').equals(@get('id')).stream(), callback)
+
   class Section extends Resource
     @path: '/v1.1/sections'
   class Student extends Resource
